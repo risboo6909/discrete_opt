@@ -4,7 +4,7 @@ use fxhash::FxHashMap;
 use crate::Item;
 
 
-fn reverse_dp(dp: FxHashMap<(usize, usize), usize>, items: Vec<Item>, mut last_cell: (usize, usize)) -> (usize, Vec<usize>) {
+fn reverse(dp: FxHashMap<(usize, usize), usize>, items: &[Item], mut last_cell: (usize, usize)) -> (usize, Vec<usize>) {
 
     let mut res = vec![0; items.len()];
     let mut value = 0;
@@ -29,7 +29,7 @@ fn reverse_dp(dp: FxHashMap<(usize, usize), usize>, items: Vec<Item>, mut last_c
             let tmp = &items[cur_idx - 1];
             last_cell = (cur_idx - 1, cur_cap - tmp.weight);
             // items were sorted before therefor we have to restore their original positions
-            res[tmp.src_idx] = 1;
+            res[tmp.index] = 1;
             value += tmp.value;
         } else {
             last_cell = (cur_idx - 1, cur_cap);
@@ -47,12 +47,7 @@ fn reverse_dp(dp: FxHashMap<(usize, usize), usize>, items: Vec<Item>, mut last_c
 /// O(j-1, Wj) if we skip item j
 ///
 /// I will use hashmap for saving values, it is slower but requires less memory
-pub(crate) fn solve_dp(mut items: Vec<Item>, cap: usize) -> (usize, usize, Vec<usize>) {
-
-    // first remember elements source indices (this is required to restore the solution)
-    for (i, item) in items.iter_mut().enumerate() {
-        item.src_idx = i;
-    }
+pub(crate) fn solve(items: &mut [Item], cap: usize) -> (usize, usize, Vec<usize>) {
 
     // use hashmap because we don't need to save 0 cells
     let mut dp = FxHashMap::with_capacity_and_hasher(items.len() * cap / 2, Default::default());
@@ -100,7 +95,7 @@ pub(crate) fn solve_dp(mut items: Vec<Item>, cap: usize) -> (usize, usize, Vec<u
     }
 
     // return result value, optimality (1 - optimal, 0 - not opt) and taken items array
-    let (res_val, items_taken) = reverse_dp(dp, items, last_cell);
+    let (res_val, items_taken) = reverse(dp, items, last_cell);
 
     (res_val, 1, items_taken)
 }

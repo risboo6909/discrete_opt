@@ -7,12 +7,11 @@ use pyo3::conversion::FromPyObject;
 use pyo3::types::PyTuple;
 
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct Item {
     index: usize,
     value: usize,
     weight: usize,
-    src_idx: usize,         // item index in a source array
 }
 
 impl FromPyObject<'_> for Item {
@@ -22,25 +21,23 @@ impl FromPyObject<'_> for Item {
             index: tmp.get_item(0).extract::<usize>()?,
             value: tmp.get_item(1).extract::<usize>()?,
             weight: tmp.get_item(2).extract::<usize>()?,
-            src_idx: 0,
         })
     }
 }
 
 #[pyfunction]
-fn solve_dp(items: Vec<Item>, cap: usize) -> PyResult<(usize, usize, Vec<usize>)> {
-    Ok(dp::solve_dp(items, cap))
+fn solve_dp(mut items: Vec<Item>, cap: usize) -> PyResult<(usize, usize, Vec<usize>)> {
+    Ok(dp::solve(&mut items, cap))
 }
 
 #[pyfunction]
-fn solve_bb(items: Vec<Item>, cap: usize) -> PyResult<(usize, usize, Vec<usize>)> {
-    Ok(dp::solve_dp(items, cap))
+fn solve_bb(mut items: Vec<Item>, error: f64, cap: usize) -> PyResult<(usize, usize, Vec<usize>)> {
+    Ok(bb::solve_bb(&mut items, error, cap))
 }
-
 
 #[pymodule]
 fn knapsack(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(solve_dp))?;
-
+    m.add_wrapped(wrap_pyfunction!(solve_bb))?;
     Ok(())
 }

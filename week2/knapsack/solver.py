@@ -38,8 +38,14 @@ def solve_it(input_data):
     ## prepare the solution in the specified output format
     #output_data = str(value) + ' ' + str(0) + '\n'
     #output_data += ' '.join(map(str, taken))
+ 
+    if item_count * capacity < 1000000000:
+        print("\nuse dp")
+        value, opt, taken = knapsack.solve_dp(items, capacity)
+    else:
+        print("\nuse bb")
+        value, opt, taken = knapsack.solve_bb(items, 0.0001, capacity)
 
-    value, opt, taken = knapsack.solve_dp(items, capacity)
     output_data = str(value) + ' ' + str(opt) + '\n'
     output_data += ' '.join(map(str, taken))
 
